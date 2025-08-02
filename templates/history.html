@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Smart Plug Dashboard</title>
+    <link rel="icon" href="{{ url_for('static', filename='icon.png') }}?v=2">
+    <link rel="stylesheet" href="/static/styles.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <style>
+    :root {
+        --primary: #4361ee;
+        --secondary: #3f37c9;
+        --accent: #4895ef;
+        --danger: #f72585;
+        --success: #4cc9f0;
+        --dark: #212529;
+        --light: #f8f9fa;
+    }
+    
+    body {
+        font-family: 'Poppins', sans-serif;
+        background: linear-gradient(135deg, #f5f7fa 0%, #e4e8f0 100%);
+        min-height: 100vh;
+        margin: 0;
+        padding: 20px;
+        color: var(--dark);
+    }
+    
+    .history-container {
+        max-width: 1200px;
+        margin: 20px auto;
+        background: white;
+        border-radius: 16px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+        overflow: hidden;
+        padding: 30px;
+    }
+    
+    .history-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 30px;
+        padding-bottom: 20px;
+        border-bottom: 1px solid rgba(0,0,0,0.05);
+    }
+    
+    .history-header h1 {
+        margin: 0;
+        font-size: 1.8rem;
+        font-weight: 600;
+        color: var(--primary);
+    }
+    
+    .btn-back {
+        background: white;
+        color: var(--primary);
+        border: 2px solid var(--primary);
+        padding: 8px 16px;
+        border-radius: 8px;
+        font-weight: 600;
+        text-decoration: none;
+        transition: all 0.3s ease;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+    }
+    
+    .btn-back:hover {
+        background: var(--primary);
+        color: white;
+        transform: translateY(-2px);
+    }
+    
+    .time-range-selector {
+        display: flex;
+        gap: 10px;
+        margin-bottom: 25px;
+        justify-content: center;
+    }
+    
+    .time-range-btn {
+        padding: 8px 16px;
+        background: white;
+        color: var(--dark);
+        border: 1px solid rgba(0,0,0,0.1);
+        border-radius: 8px;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+    
+    .time-range-btn:hover {
+        background: var(--primary);
+        color: white;
+        border-color: var(--primary);
+    }
+    
+    .date-selector {
+        display: flex;
+        gap: 15px;
+        align-items: center;
+        margin: 30px 0;
+        background: rgba(72, 149, 239, 0.1);
+        padding: 15px;
+        border-radius: 12px;
+    }
+    
+    .date-selector select {
+        flex: 1;
+        padding: 10px 15px;
+        border: 1px solid rgba(0,0,0,0.1);
+        border-radius: 8px;
+        font-family: 'Poppins', sans-serif;
+        background: white;
+    }
+    
+    .load-charts-btn {
+        padding: 10px 20px;
+        background: var(--primary);
+        color: white;
+        border: none;
+        border-radius: 8px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+    
+    .load-charts-btn:hover {
+        background: var(--secondary);
+        transform: translateY(-2px);
+    }
+    
+    .chart-grid {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 25px;
+        margin-top: 30px;
+    }
+    
+    .chart-card {
+        background: white;
+        border-radius: 12px;
+        padding: 20px;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+        height: 300px;
+    }
+    
+    .chart-title {
+        font-size: 1.2rem;
+        color: var(--dark);
+        margin-bottom: 15px;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+    
+    .chart-title::before {
+        content: "";
+        display: block;
+        width: 12px;
+        height: 12px;
+        border-radius: 3px;
+    }
+    
+    #powerChart .chart-title::before { background: #4cc9f0; }
+    #voltageChart .chart-title::before { background: #f72585; }
+    #currentChart .chart-title::before { background: #4895ef; }
+    
+    .no-data {
+        text-align: center;
+        padding: 50px;
+        color: #7f8c8d;
+        font-size: 1.1rem;
+    }
+    
+    .stats-card {
+        background: linear-gradient(135deg, #4361ee 0%, #3f37c9 100%);
+        border-radius: 12px;
+        padding: 25px;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        margin-bottom: 25px;
+        color: white;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        transition: transform 0.3s ease;
+    }
+    
+    .stats-card:hover {
+        transform: translateY(-3px);
+    }
+    
+    .stats-content {
+        display: flex;
+        align-items: center;
+        gap: 20px;
+    }
+    
+    .stats-text {
+        display: flex;
+        flex-direction: column;
+    }
+    
+    .stats-label {
+        font-size: 1rem;
+        opacity: 0.9;
+        margin-bottom: 5px;
+    }
+    
+    .stats-value-container {
+        display: flex;
+        align-items: baseline;
+        gap: 5px;
+    }
+    
+    .stats-value {
+        font-size: 2rem;
+        font-weight: 700;
+    }
+    
+    .stats-unit {
+        font-size: 1.2rem;
+        opacity: 0.9;
+    }
+    
+    @media (max-width: 768px) {
+        .history-container {
+            padding: 20px;
+        }
+        
+        .history-header {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 15px;
+        }
+        
+        .date-selector {
+            flex-direction: column;
+        }
+        
+        .stats-content {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 10px;
+        }
+        
+        .stats-value {
+            font-size: 1.8rem;
+        }
+    }
+</style>
+</head>
+<body>
+    <div class="history-container">
+        <div class="history-header">
+            <h1>Energy Usage History</h1>
+            <a href="/" class="btn-back">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                    <path fill-rule="evenodd" d="M15 8a.5.5 0 0 0-.5-.5H2.707l3.147-3.146a.5.5 0 1 0-.708-.708l-4 4a.5.5 0 0 0 0 .708l4 4a.5.5 0 0 0 .708-.708L2.707 8.5H14.5A.5.5 0 0 0 15 8z"/>
+                </svg>
+                Back to Dashboard
+            </a>
+        </div>
+        
+        
+        {% if not analysis %}
+            <div class="no-data">
+                <p>No historical data available</p>
+            </div>
+        {% else %}
+            <div class="date-selector">
+                <select id="date-select">
+                    {% for date in analysis.keys()|sort %}
+                        <option value="{{ date }}">{{ date }}</option>
+                    {% endfor %}
+                </select>
+                <button id="load-charts" class="load-charts-btn">
+                    Load Charts
+                </button>
+            </div>
+            
+            <div id="stats-section" style="display: none;">
+                <div class="stats-card">
+                    <div style="display: flex; align-items: center;">
+                        <div>
+                            <div class="stats-label">Total Energy Consumption</div>
+                            <div style="display: flex; align-items: baseline;">
+                                <div class="stats-value" id="total-kwh">0</div>
+                                <div class="stats-unit">kWh</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div id="charts-section" style="display: none;">
+                <div class="chart-grid">
+                    <div class="chart-card">
+                        <h3 class="chart-title">Power Consumption (W)</h3>
+                        <canvas id="powerChart"></canvas>
+                    </div>
+                    <div class="chart-card">
+                        <h3 class="chart-title">Voltage (V)</h3>
+                        <canvas id="voltageChart"></canvas>
+                    </div>
+                    <div class="chart-card">
+                        <h3 class="chart-title">Current (A)</h3>
+                        <canvas id="currentChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        {% endif %}
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const dateSelect = document.getElementById('date-select');
+            const loadChartsBtn = document.getElementById('load-charts');
+            const chartsSection = document.getElementById('charts-section');
+            const statsSection = document.getElementById('stats-section');
+            
+            let powerChart, voltageChart, currentChart;
+            
+            loadChartsBtn.addEventListener('click', function() {
+                const selectedDate = dateSelect.value;
+                console.log(`Requesting data for date: ${selectedDate}`);
+                
+                fetch(`/historical_data?date=${selectedDate}`)
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error(`HTTP error! status: ${response.status}`);
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        console.log("Received data:", data);
+                        if (data.error) {
+                            alert(data.error);
+                            return;
+                        }
+                        
+                        // Show stats and charts sections if hidden
+                        statsSection.style.display = 'block';
+                        chartsSection.style.display = 'block';
+                        
+                        // Update total kWh
+                        document.getElementById('total-kwh').textContent = data.total_kwh;
+                        
+                        // Initialize charts if they don't exist
+                        if (!powerChart) {
+                            const powerCtx = document.getElementById('powerChart').getContext('2d');
+                            const voltageCtx = document.getElementById('voltageChart').getContext('2d');
+                            const currentCtx = document.getElementById('currentChart').getContext('2d');
+                            
+                            powerChart = createChart(powerCtx, 'Power (W)', 'rgb(75, 192, 192)');
+                            voltageChart = createChart(voltageCtx, 'Voltage (V)', 'rgb(255, 99, 132)');
+                            currentChart = createChart(currentCtx, 'Current (A)', 'rgb(54, 162, 235)');
+                        }
+                        
+                        // Update charts with historical data
+                        updateChart(powerChart, data.timestamps, data.power);
+                        updateChart(voltageChart, data.timestamps, data.voltage);
+                        updateChart(currentChart, data.timestamps, data.current);
+                    })
+                    .catch(error => {
+                        console.error('Error loading historical data:', error);
+                        alert(`Failed to load historical data: ${error.message}`);
+                    });
+            });
+
+            function createChart(ctx, label, color) {
+                return new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: [],
+                        datasets: [{
+                            label: label,
+                            data: [],
+                            borderColor: color,
+                            backgroundColor: color.replace(')', ', 0.1)').replace('rgb', 'rgba'),
+                            borderWidth: 2,
+                            tension: 0.1,
+                            fill: true
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: { display: true },
+                            tooltip: {
+                                mode: 'index',
+                                intersect: false
+                            }
+                        },
+                        scales: {
+                            x: {
+                                grid: { display: false },
+                                ticks: {
+                                    maxRotation: 45,
+                                    minRotation: 45,
+                                    autoSkip: true,
+                                    maxTicksLimit: 12
+                                }
+                            },
+                            y: {
+                                beginAtZero: false,
+                                grace: '5%'
+                            }
+                        }
+                    }
+                });
+            }
+
+            function updateChart(chart, labels, data) {
+                chart.data.labels = labels;
+                chart.data.datasets[0].data = data;
+                chart.update();
+            }
+        });
+    </script>
+</body>
+</html>

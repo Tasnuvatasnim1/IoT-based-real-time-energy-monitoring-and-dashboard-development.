@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Smart Plug User Manual</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="{{ url_for('static', filename='icon.png') }}?v=2">
+    <link rel="stylesheet" href="/static/styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #4361ee;
+            --secondary: #3f37c9;
+            --accent: #4895ef;
+            --danger: #f72585;
+            --success: #4cc9f0;
+            --dark: #212529;
+            --light: #f8f9fa;
+        }
+        
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #e4e8f0 100%);
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+            color: var(--dark);
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 20px auto;
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+            overflow: hidden;
+            position: relative;
+            padding: 30px;
+        }
+        
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 30px;
+            background: linear-gradient(to right, var(--primary), var(--secondary));
+            color: white;
+            margin-bottom: 30px;
+        }
+        
+        h1 {
+            margin: 0;
+            font-size: 1.8rem;
+            font-weight: 600;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            color: #ffffff;
+        }
+        
+        .btn {
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-weight: 600;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0,0,0,0.1);
+        }
+        
+        .btn-download {
+            background: var(--primary);
+            color: white;
+            margin-bottom: 30px;
+            cursor: pointer;
+        }
+        
+        .btn-back {
+            background: white;
+            color: var(--primary);
+            border: 2px solid var(--primary);
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-weight: 600;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .btn-back:hover {
+            background: var(--primary);
+            color: white;
+            transform: translateY(-2px);
+        }
+
+        .manual-section {
+            margin-bottom: 40px;
+        }
+        
+        .manual-section h2 {
+            color: var(--primary);
+            border-bottom: 2px solid var(--accent);
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+        }
+        
+        .manual-section h3 {
+            color: var(--secondary);
+            margin-top: 25px;
+        }
+        
+        .manual-image {
+            max-width: 100%;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            margin: 20px 0;
+        }
+
+        .status-on {
+            color: rgb(11, 215, 11);
+            font-weight: bold;
+        }
+
+        .status-off {
+            color: red;
+            font-weight: bold;
+        }
+
+        .print-help {
+            font-size: 0.8em;
+            color: #666;
+            margin-top: 5px;
+            display: none;
+        }
+
+        @media print {
+            @page {
+                size: A4;
+                margin: 15mm;
+            }
+            
+            body {
+                background: white !important;
+                color: black !important;
+                padding: 0 !important;
+                margin: 0 !important;
+                font-size: 12pt;
+            }
+            
+            .container {
+                box-shadow: none !important;
+                border-radius: 0 !important;
+                padding: 0 !important;
+                margin: 0 !important;
+                width: 100% !important;
+            }
+            
+            .header, .btn-back, .btn-download, .print-help {
+                display: none !important;
+            }
+            
+            .manual-section {
+                page-break-inside: avoid;
+                margin-bottom: 15mm;
+            }
+            
+            h1, h2, h3 {
+                page-break-after: avoid;
+            }
+            
+            .manual-image {
+                max-width: 80% !important;
+                height: auto !important;
+                margin: 5mm auto !important;
+                display: block !important;
+            }
+            
+            .status-on {
+                color: darkgreen !important;
+            }
+            
+            .status-off {
+                color: darkred !important;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Smart Plug User Manual</h1>
+            <a href="/" class="btn-back">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                    <path fill-rule="evenodd" d="M15 8a.5.5 0 0 0-.5-.5H2.707l3.147-3.146a.5.5 0 1 0-.708-.708l-4 4a.5.5 0 0 0 0 .708l4 4a.5.5 0 0 0 .708-.708L2.707 8.5H14.5A.5.5 0 0 0 15 8z"/>
+                </svg>
+                Back to Dashboard
+            </a>
+        </div>
+        
+        <button onclick="downloadAsPDF()" class="btn btn-download">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                <path d="M.5 9.9a.5.5 0 0 1 .5.5v2.5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-2.5a.5.5 0 0 1 1 0v2.5a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2v-2.5a.5.5 0 0 1 .5-.5z"/>
+                <path d="M7.646 11.854a.5.5 0 0 0 .708 0l3-3a.5.5 0 0 0-.708-.708L8.5 10.293V1.5a.5.5 0 0 0-1 0v8.793L5.354 8.146a.5.5 0 1 0-.708.708l3 3z"/>
+            </svg>
+            Download PDF
+        </button>
+        <p class="print-help">Tip: In the print dialog, choose "Save as PDF" and set filename to "Smart_Plug_Manual.pdf"</p>
+        
+        <div class="manual-section">
+            <h2>Smart Plug Control System</h2>
+            <p>Welcome to your Smart Plug Dashboard. This manual will guide you through all the features and functionality.</p>
+            
+            <h3>1. Dashboard Overview</h3>
+            <p>The dashboard is your main control center for monitoring and managing your smart plug.</p>
+            
+            <h4>Device Status Indicators</h4>
+            <ul>
+                <li><strong class="status-on">ON</strong> - Device is on and working</li>
+                <li><strong class="status-off">OFF</strong> - Device is off</li>
+            </ul>
+            
+            <img src="{{ url_for('static', filename='dashboard2.png') }}" alt="Dashboard Overview" class="manual-image">
+        </div>
+        
+        <div class="manual-section">
+            <h3>2. Understanding the Charts</h3>
+            <p>The charts visualize how your energy usage changes over time.</p>
+            
+            <h4>Chart Components</h4>
+            <ul>
+                <li><strong>X-Axis (Bottom)</strong> - Shows the time when measurements were recorded</li>
+                <li><strong>Y-Axis (Left Side)</strong> - Shows the measurement values (Watts, Volts, Amps)</li>
+            </ul>
+            
+            <img src="{{ url_for('static', filename='chart_explanation.png') }}" alt="Chart Explanation" class="manual-image">
+        </div>
+        
+        <div class="manual-section">
+            <h3>3. Power Control</h3>
+            <p>Control your smart plug with these simple steps:</p>
+            
+            <h4>Turning On/Off</h4>
+            <ol>
+                <li>Locate the power buttons in the Control Section</li>
+                <li>Click "Turn ON" to activate the plug</li>
+                <li>Click "Turn OFF" to deactivate the plug</li>
+            </ol>
+            
+            <h4>Safety Features</h4>
+            <ul>
+                <li>Automatic overload protection</li>
+                <li>Real-time power monitoring</li>
+                <li>Remote access control</li>
+            </ul>
+        </div>
+        
+        <div class="manual-section">
+            <h3>4. Energy Monitoring</h3>
+            <p>Understand your energy consumption with these metrics:</p>
+            
+            <h4>Key Measurements</h4>
+            <ul>
+                <li><strong>Power (W)</strong> - Current power consumption in Watts</li>
+                <li><strong>Voltage (V)</strong> - Electrical potential difference</li>
+                <li><strong>Current (A)</strong> - Flow of electric charge</li>
+            </ul>
+        </div>
+        
+        <div class="manual-section">
+            <h3>5. Troubleshooting</h3>
+            
+            <h4>Common Issues</h4>
+            <ul>
+                <li><strong>Device not responding</strong> - Check network connection and power supply</li>
+                <li><strong>Incorrect readings</strong> - Ensure proper device calibration</li>
+                <li><strong>Connection issues</strong> - Restart both the device and router</li>
+                <li><strong>User manual Download</strong> - Click "Download PDF" in the top-right corner, select "Print", set file name and then "Save".</li>
+            </ul>
+        </div>
+    </div>
+
+    <script>
+        // Detect mobile devices
+        const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+        
+        // Show mobile instructions if needed
+        if (isMobile) {
+            document.querySelector('.print-help').style.display = 'block';
+        }
+        
+        function downloadAsPDF() {
+            // Set document title as filename (works in Chrome/Edge)
+            const originalTitle = document.title;
+            document.title = "Smart_Plug_User_Manual_" + new Date().toISOString().slice(0, 10);
+            
+            // Trigger print dialog
+            window.print();
+            
+            // Restore original title after delay
+            setTimeout(() => {
+                document.title = originalTitle;
+            }, 1000);
+            
+            // Show mobile-specific instructions
+            if (isMobile) {
+                alert("To save as PDF:\n1. Tap the 3-dot menu\n2. Select 'Print'\n3. Choose 'Save as PDF'\n4. Set filename if needed");
+            }
+        }
+    </script>
+</body>
+</html>
