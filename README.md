@@ -26,9 +26,9 @@ This project presents a cost-effective IoT-based system to monitor real-time ene
 
 ## 🧪 Requirements
 
-- Python 3.8+
+- Python
 - Flask
-- TinyTuya
+- TinyTuya 3.5
 - Chart.js (linked via CDN)
 - Cloudflare Tunnel (optional, for remote access)
 
